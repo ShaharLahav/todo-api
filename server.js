@@ -57,8 +57,39 @@ app.delete('/todos/:id' , function (req,res)
 			res.json(matched);
 		}
 	else
-		res.status(400).json({"Error": "no todo found"});
+		res.status(404).json({"Error": "no todo found"});
 });
+
+app.put('/todos/:id' , function (req , res) {
+	var todoID = parseInt(req.params.id , 10);
+	var matched = _.findWhere(todos, {id: todoID});
+	var body = _.pick(req.body, 'description' , 'completed');
+	var validAtt = {};
+
+	if(!matched)
+		return res.status(404).send();
+
+	if(body.hasOwnProperty('completed') && _.isBoolean(body.completed))
+		validAtt.completed = body.completed;
+	else if(body.hasOwnProperty('completed'))
+		return res.status(400).send();
+
+	if(body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length>0)
+		validAtt.description = body.description;
+	else if(body.hasOwnProperty('description'))
+		return res.status(400).send();
+
+	_.extend(matched , validAtt);
+	res.json(matched);
+	//body.description = body.description.trim();
+
+
+
+	// todos.push(addToDo);
+	// console.log('description: ' + body.description);
+
+	// res.json(body);
+})
 
 app.listen(PORT, function () {
 	console.log('Express listening on port ' + PORT);
