@@ -85,7 +85,6 @@ app.put('/todos/:id' , function (req , res) {
 
 
 
-	// todos.push(addToDo);
 	// console.log('description: ' + body.description);
 
 	// res.json(body);
