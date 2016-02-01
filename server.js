@@ -36,14 +36,24 @@ app.get('/todos', function(req, res) {
 
 app.get('/todos/:id', function(req, res) {
 	var todoID = parseInt(req.params.id, 10);
-	var matched = _.findWhere(todos, {
-		id: todoID
-	});
-	if (typeof matched === 'undefined')
-		res.status(404).send();
-	else {
-		res.json(matched);
-	}
+
+	db.todo.findById(todoID)
+		.then(function(todo) {
+			if (!!todo)
+				res.json(todo.toJSON());
+			else
+				res.status(404).send();
+		}, function(error) {
+			res.status(500).json(error);
+		});
+	// var matched = _.findWhere(todos, {
+	// 	id: todoID
+	// });
+	// if (typeof matched === 'undefined')
+	// 	res.status(404).send();
+	// else {
+	// 	res.json(matched);
+	// }
 });
 
 app.post('/todos', function(req, res) {
