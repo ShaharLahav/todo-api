@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
+var db = require('./db.js');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
@@ -48,19 +49,30 @@ app.get('/todos/:id', function(req, res) {
 app.post('/todos', function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed');
 
-	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-		return res.status(400).send();
-	}
+	db.todo.create({
+			description: body.description,
+			completed: body.completed
+		})
+		.then(function(todo) {
+			if (todo)
+				res.json(todo.toJSON());
+			else
+				res.status(400).send("Stntax Error!");
+		});
+
+	// if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+	// 	return res.status(400).send();
+	// }
 
 
-	body.description = body.description.trim();
+	// body.description = body.description.trim();
 
-	var addToDo = body;
-	addToDo.id = todoNextId++;
-	todos.push(addToDo);
-	console.log('description: ' + body.description);
+	// var addToDo = body;
+	// addToDo.id = todoNextId++;
+	// todos.push(addToDo);
+	// console.log('description: ' + body.description);
 
-	res.json(body);
+	// res.json(body);
 });
 
 app.delete('/todos/:id', function(req, res) {
@@ -102,6 +114,8 @@ app.put('/todos/:id', function(req, res) {
 	res.json(matched);
 })
 
-app.listen(PORT, function() {
-	console.log('Express listening on port ' + PORT);
+db.sequelize.sync({}).then(function() {
+	app.listen(PORT, function() {
+		console.log('Express listening on port ' + PORT);
+	});
 });
